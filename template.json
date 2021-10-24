@@ -1,0 +1,362 @@
+{
+  "Spaces": {
+      "General": [
+        {
+          "Name": "Delta",
+          "Floor_Area": 554.0,
+          "Avg_Ceiling_Height": 111.0,
+          "Building Weight": 32.0,
+          "OA Req 1": 44.0,
+          "OA Req 1 Units": "% of supply air",
+          "OA Req 2": 42.0,
+          "OA Req 2 Units": "CFM/person"
+        },
+        {
+          "Name": "Charlie",
+          "Floor_Area": 556.0,
+          "Avg_Ceiling_Height": 11.0,
+          "Building Weight": 3.0,
+          "OA Req 1": 4.0,
+          "OA Req 1 Units": "% of supply air",
+          "OA Req 2": 42.0,
+          "OA Req 2 Units": "% of supply air"
+        }
+      ],
+      "Internals": [
+        {
+          "Electrical_Equipment": {
+            "Wattage": 500,
+            "Wattage_Units": "Watts",
+            "Schedule": "Sample Schedule"
+          },
+          "People": {
+            "Occupancy": 2,
+            "Activity_Level": "Heavy Work",
+            "Schedule": "Sample Schedule"
+          }
+        },
+        {
+          "Electrical_Equipment": {
+            "Wattage": 13.3,
+            "Wattage_Units": "W/ft^2",
+            "Schedule": "Fleep"
+          },
+          "People": {
+            "Occupancy": 42,
+            "Activity_Level": "Seated at Rest",
+            "Schedule": "Yup"
+          }
+        }
+      ],
+      "Walls_Windows_Doors": [
+        {
+          "1":{
+            "Exposure": "N",
+            "Wall_Area": 452,
+            "Window": 1,
+            "Door": 2
+          },
+          "2":{
+            "Exposure": "NE",
+            "Wall_Area": 424,
+            "Window": 5,
+            "Door": 6
+          },
+          "3":{
+            "Exposure": "E",
+            "Wall_Area": 432,
+            "Window": 1,
+            "Door": 6
+          },
+          "4":{
+            "Exposure": "SE",
+            "Wall_Area": 342,
+            "Window": 1,
+            "Door": 6
+          },
+          "5":{
+            "Exposure": "S",
+            "Wall_Area": 482,
+            "Window": 1,
+            "Door": 6
+          },
+          "6":{
+            "Exposure": "SW",
+            "Wall_Area": 462,
+            "Window": 1,
+            "Door": 2
+          },
+          "7":{
+            "Exposure": "W",
+            "Wall_Area": 423,
+            "Window": 4,
+            "Door": 6
+          },
+          "8":{
+            "Exposure": "NW",
+            "Wall_Area": 422,
+            "Window": 5,
+            "Door": 6
+          },
+          "Construction_Types": {
+            "Wall": "Default Wall Assembly",
+            "Window": "Sample Window Assembly",
+            "Door": "Sample Door Assembly"
+          }
+        },
+        {
+          "1":{
+            "Exposure": "N",
+            "Wall_Area": 42,
+            "Window": 54,
+            "Door": 69
+          },
+          "2":{
+            "Exposure": "N",
+            "Wall_Area": 222,
+            "Window": 2,
+            "Door": 3
+          },
+          "3":{
+            "Exposure": "N",
+            "Wall_Area": 123,
+            "Window": 1,
+            "Door": 2
+          },
+          "4":{
+            "Exposure": "N",
+            "Wall_Area": 412,
+            "Window": 54,
+            "Door": 69
+          },
+          "5":{
+            "Exposure": "S",
+            "Wall_Area": 422,
+            "Window": 4,
+            "Door": 6
+          },
+          "6":{
+            "Exposure": "SW",
+            "Wall_Area": 424,
+            "Window": 3,
+            "Door": 4
+          },
+          "7":{
+            "Exposure": "W",
+            "Wall_Area": 42,
+            "Window": 54,
+            "Door": 69
+          },
+          "8":{
+            "Exposure": "NW",
+            "Wall_Area": 423,
+            "Window": 5,
+            "Door": 6
+          },
+          "Construction_Types": {
+            "Wall": "Default Wall Assembly",
+            "Window": "Sample Window Assembly",
+            "Door": "Sample Door Assembly"
+        }
+        }
+      ],
+      "Roofs_Skylights":[
+        {
+          "1": {
+            "Exposure": "N",
+            "Roof_Area": "200",
+            "Roof_Slope": 45,
+            "Skylight": 2
+          },
+          "2": {
+            "Exposure": "S",
+            "Roof_Area": "532",
+            "Roof_Slope": 45,
+            "Skylight": 2
+          },
+          "3": {
+            "Exposure": "E",
+            "Roof_Area": "222",
+            "Roof_Slope": 45,
+            "Skylight": 2
+          },
+          "4": {
+            "Exposure": "N",
+            "Roof_Area": "132",
+            "Roof_Slope": 45,
+            "Skylight": 2
+          },
+          "Construction_Types": {
+            "Roof": "Default Roof Assembly",
+            "Skylight": "Sample Window Assembly"
+          }
+        },
+        {
+          "1": {
+            "Exposure": "N",
+            "Roof Area": "53.2",
+            "Roof Slope": 45,
+            "Skylight": 2
+          },
+          "2": {
+            "Exposure": null,
+            "Roof Area": "53.2",
+            "Roof Slope": 60,
+            "Skylight": 2
+          },
+          "3": {
+            "Exposure": "N",
+            "Roof Area": "53.2",
+            "Roof Slope": 60,
+            "Skylight": 2
+          },
+          "4": {
+            "Exposure": "N",
+            "Roof Area": "53.2",
+            "Roof Slope": 60,
+            "Skylight": 2
+          },
+          "Construction_Types": {
+            "Roof": "Default Roof Assembly",
+            "Skylight": "Sample Window Assembly"
+          }
+        }
+      ],
+      "Infiltration": [
+        {
+          "Design_Cooling": {
+            "CFM": 1.01
+          },
+          "Design_Heating": {
+            "CFM": 0.34
+          },
+          "Energy_Analysis": {
+            "CFM": 0.3
+          },
+          "Infiltration_Occurs": {
+            "Only_When_Fan_Off_All_Hours": "All Hours"
+          }
+        },
+        {
+          "Design_Cooling": {
+            "CFM": 2.01
+          },
+          "Design_Heating": {
+            "CFM": 1.01
+          },
+          "Energy_Analysis": {
+            "CFM": 1.01
+          },
+          "Infiltration_Occurs": {
+            "Only_When_Fan_Off_All_Hours": "Only When Fan Off"
+          }
+        }
+      ],
+      "Floors": [
+        {
+          "Floor_Above_Conditioned_Space": {
+            "TF": false
+          },
+          "Floor_Above_Unconditioned_Space": {
+            "TF": false,
+            "Floor_Area": 31,
+            "Floor_Uvalue": 0.1,
+            "Unconditioned_Space_Max_Temp": 78,
+            "Ambient_At_Space_Max_Temp": 98,
+            "Unconditioned_Space_Min_Temp": 65,
+            "Ambient_At_Space_Min_Temp": 2
+          },
+          "Floor_On_Grade": {
+            "TF": false,
+            "Floor_Area": 32,
+            "Floor_Uvalue": 0.2,
+            "Exposed_Perimeter": 66,
+            "Edge_Insulation_RValue": 6
+          },
+          "Floor_Below_Grade": {
+            "TF": true,
+            "Floor_Area": 232,
+            "Exposed_Perimeter": 44,
+            "Floor_Uvalue": 5,
+            "Floor_Depth": 4,
+            "Basement_Wall_Uvalue": 6,
+            "Wall_Insulation_Rvalue": 5,
+            "Depth_Of_Wall_Insulation": 2
+          }
+        },
+        {
+          "Floor_Above_Conditioned_Space": {
+            "TF": false
+          },
+          "Floor_Above_Unconditioned_Space": {
+            "TF": true,
+            "Floor_Area": 31,
+            "Floor_Uvalue": 0.1,
+            "Unconditioned_Space_Max_Temp": 78,
+            "Ambient_at_Space_Max_Temp": 98,
+            "Unconditioned_Space_Min_Temp": 65,
+            "Ambient_at_Space_Min_Temp": null
+          },
+          "Floor_On_Grade": {
+            "TF": false,
+            "Floor_Area": null,
+            "Floor_Uvalue": null,
+            "Exposed_Perimeter": null,
+            "Edge_Insulation_RValue": null
+          },
+          "Floor_Below_Grade": {
+            "TF": false,
+            "Floor_Area": null,
+            "Exposed_Perimeter": null,
+            "Floor_Uvalue": null,
+            "Floor_Depth": null,
+            "Basement_Wall_Uvalue": null,
+            "Wall_Insulation_Rvalue": null,
+            "Depth_Of_Wall_Insulation": null
+          }
+        }
+      ],
+      "Partitions": [
+        {
+          "Partition_1": {
+            "Ceiling_Wall": "Wall",
+            "Area": 123,
+            "Uvalue": 0.2, 
+            "Unconditioned_Space_Max_Temp": 90,
+            "Ambient_At_Space_Max_Temp": 90,
+            "Unconditioned_Space_Min_Temp": 2,
+            "Ambient_At_Space_Min_Temp": 2
+          },
+          "Partition_2": {
+            "Ceiling_Wall": "Wall",
+            "Area": 123,
+            "Uvalue": 0.2, 
+            "Unconditioned_Space_Max_Temp": 89,
+            "Ambient_At_Space_Max_Temp": 91,
+            "Unconditioned_Space_Min_Temp": 3,
+            "Ambient_At_Space_Min_Temp": 9
+          }
+        },
+        {
+          "Partition_1": {
+            "Ceiling_Wall": null,
+            "Area": null,
+            "Uvalue": null, 
+            "Unconditioned_Space_Max_Temp": null,
+            "Ambient_At_Space_Max_Temp": null,
+            "Unconditioned_Space_Min_Temp": null,
+            "Ambient_At_Space_Min_Temp": null
+          },
+          "Partition_2": {
+            "Ceiling_Wall": null,
+            "Area": null,
+            "Uvalue": null, 
+            "Unconditioned_Space_Max_Temp": null,
+            "Ambient_At_Space_Max_Temp": null,
+            "Unconditioned_Space_Min_Temp": null,
+            "Ambient_At_Space_Min_Temp": null
+          }
+        }
+      ]
+  }
+}
