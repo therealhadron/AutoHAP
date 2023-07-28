@@ -15,11 +15,11 @@
           (setq is_closed (cdr (assoc 70 entity_data)))
           (if (= is_closed 1)
             (progn
-              (setq layerName (cdr (assoc 8 entity_data)))
+              (setq layer_name (cdr (assoc 8 entity_data)))
               (setq vertices (mapcar 'cdr (vl-remove-if '(lambda (x) (/= 10 (car x))) entity_data)))
               (setq filter_list (vl-remove nil vertices))
 
-              (write-line (strcat "<Layer_name>" layerName) file)
+              (write-line (strcat "<Layer_name>" layer_name) file)
 
               (write-line (strcat "<Coordinates>") file)
               (foreach vertex filter_list
@@ -31,11 +31,25 @@
           )
         )
       )
+      (if (= (cdr (assoc 0 entity_data)) "LINE")
+        (progn
+          (setq layer_name (cdr (assoc 8 entity_data)))
+          (setq start_point (cdr (assoc 10 entity_data)))
+          (setq end_point (cdr (assoc 11 entity_data)))
+          (write-line (strcat "{") file)
+          (write-line (strcat "<Layer_name>" layer_name) file)
+          (write-line (strcat "<start_point>(" (rtos (car start_point)) "," (rtos (cadr start_point)) ")") file)
+          (write-line (strcat "<end_point>(" (rtos (car end_point)) "," (rtos (cadr end_point)) ")") file)
+          (write-line (strcat "}") file)
+        )
+      )
       (if (= (cdr (assoc 0 entity_data)) "MTEXT")
         (progn
           (write-line (strcat "{") file)
           (setq mtext_contents (cdr (assoc 1 entity_data)))
+          (setq mtext_layer_name (cdr (assoc 8 entity_data)))
           (setq mtext_location (cdr (assoc 10 entity_data)))
+          (write-line (strcat "<Layer_name>" mtext_layer_name) file)
           (write-line (strcat "<Text_contents>" mtext_contents) file)
           (write-line (strcat "<Coordinates>") file)
           (write-line (strcat "(" (rtos (car mtext_location)) "," (rtos (cadr mtext_location)) ")") file)
