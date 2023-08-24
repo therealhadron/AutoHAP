@@ -6,7 +6,7 @@
 
 Opt("MouseCoordMode", 0)
 ;~ todo: json decoding
-$file = @ScriptDir & "\template.json"
+$file = @ScriptDir & "\final_data.json"
 $jsonObject = json_decode_from_file($file)
 $spaceObject = Json_ObjGet($jsonObject, ".Spaces")
 
@@ -22,6 +22,8 @@ main()
 Func main()
     startHAP()
 
+	Sleep(2000)
+
     openWalls()
     openWindows()
     openDoors()
@@ -30,14 +32,23 @@ Func main()
 
     openSpaces()
     WinActivate($MAIN_FORM)
-    
-    _insert_space_general(Json_Get($spaceObject, '.General[0].Name'), Json_Get($spaceObject, '.General[0].Floor_Area'), Json_Get($spaceObject, '.General[0].Avg_Ceiling_Height'))
-    _insert_space_internals(Json_Get($spaceObject, '.Internals[0].Electrical_Equipment.Wattage_Units'), Json_Get($spaceObject, '.Internals[0].Electrical_Equipment.Wattage'), Json_Get($spaceObject, '.Internals[0].Electrical_Equipment.Schedule'), Json_Get($spaceObject, '.Internals[0].People.Activity_Level'), Json_Get($spaceObject, '.Internals[0].People.Occupancy'), Json_Get($spaceObject, '.Internals[0].People.Schedule'))
+
+	$spaceObject = Json_Get($jsonObject, ".Spaces[0]")
+
+    _insert_space_general(Json_Get($spaceObject, '.General.Name'), _
+						Json_Get($spaceObject, '.General.Floor_Area'), _
+						Json_Get($spaceObject, '.General.Avg_Ceiling_Height'))
+    _insert_space_internals(Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage_Units'), _
+							Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage'), _
+							Json_Get($spaceObject, '.Internals.Electrical_Equipment.Schedule'), _
+							Json_Get($spaceObject, '.Internals.People.Activity_Level'), _
+							Json_Get($spaceObject, '.Internals.People.Occupancy'), _
+							Json_Get($spaceObject, '.Internals.People.Schedule'))
     _insert_space_walls_windows_doors(0)
-    _insert_space_roofs_skylights(0)
-    _insert_space_infiltration(0)
-    _insert_space_floors(0)
-    _insert_space_partitions(0)
+    ;~ _insert_space_roofs_skylights(0)
+    ;~ _insert_space_infiltration(0)
+    ;~ _insert_space_floors(0)
+    ;~ _insert_space_partitions(0)
 EndFunc
 
 ;~ ===================
@@ -78,7 +89,6 @@ EndFunc
 ;~ Walls, Windows, Doors
 ;~ ===================
 Func _insert_space_walls_windows_doors($index)
-    Local $Array = _WWD_get_json_data($index)
     ControlClick($MAIN_FORM, "", "SSTabCtlWndClass1", "primary", 1, 170, 10)
     Sleep(500)
     $directionCount = 20
@@ -86,21 +96,30 @@ Func _insert_space_walls_windows_doors($index)
     $windowCount = 51
     $doorCount = 80
     For $i = 0 To 7 Step 1
-        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & $directionCount, "FindString", $Array[$i][0])
+
+		$exposure = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Exposure')
+		$wall_area = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Wall_Area')
+		$window = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Window')
+		$door = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Door')
+		$wall_assembly = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Wall_Assembly')
+		$window_assembly = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Window_Assembly')
+		$door_assembly = Json_Get($spaceObject, '.Walls_Windows_Doors[' & $i & '].Door_Assembly')
+
+        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & $directionCount, "FindString", $exposure)
         ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & $directionCount, "SetCurrentSelection", $occ)
 
-        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $areaCount, $Array[$i][1])
+        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $areaCount, $wall_area)
 
         ;~ Vaildates windows
-        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $windowCount, $Array[$i][2])
+        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $windowCount, $window)
 
-        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $doorCount, $Array[$i][3])
+        ControlSetText($MAIN_FORM, "", $THUNDER_TEXT_BOX & $doorCount, $door)
 
-        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 12, "FindString", $Array[$i][4])
+        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 12, "FindString", $wall_assembly)
         ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 12, "SetCurrentSelection", $occ)
-        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 11, "FindString", $Array[$i][5])
+        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 11, "FindString", $window_assembly)
         ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 11, "SetCurrentSelection", $occ)
-        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 7, "FindString", $Array[$i][6])
+        $occ = ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 7, "FindString", $door_assembly)
         ControlCommand($MAIN_FORM, "", $THUNDER_COMBO_BOX & 7, "SetCurrentSelection", $occ)
 
         $directionCount = $directionCount - 1
@@ -218,7 +237,7 @@ Func _insert_space_floors($index)
     ControlClick($MAIN_FORM, "", "SSTabCtlWndClass1", "primary", 1, 400, 10)
 
     Local Enum $efloor_above_conditioned_space = 10, $efloor_above_unconditioned_space = 9, $efloor_on_grade = 8, $efloor_below_grade = 7
-    
+
     if Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Above_Conditioned_Space.TF') Then
         $floorCond = $efloor_above_conditioned_space
     ElseIf Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Above_Unconditioned_Space.TF') Then
@@ -252,7 +271,7 @@ Func _insert_space_floors($index)
             Next
         Case $efloor_on_grade
             Local $Array[4]
-            $Array[0] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_On_Grade.Floor_Area') 
+            $Array[0] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_On_Grade.Floor_Area')
             $Array[1] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_On_Grade.Floor_Uvalue')
             $Array[2] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_On_Grade.Exposed_Perimeter')
             $Array[3] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_On_Grade.Edge_Insulation_RValue')
@@ -263,8 +282,8 @@ Func _insert_space_floors($index)
             Next
         Case $efloor_below_grade
             Local $Array[7]
-            $Array[0] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Floor_Area') 
-            $Array[1] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Exposed_Perimeter') 
+            $Array[0] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Floor_Area')
+            $Array[1] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Exposed_Perimeter')
             $Array[2] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Floor_Uvalue')
             $Array[3] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Floor_Depth')
             $Array[4] = Json_Get($spaceObject, '.Floors[' & $index & '].Floor_Below_Grade.Basement_Wall_Uvalue')

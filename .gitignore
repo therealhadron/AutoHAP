@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+autocad_output.txt
+data.json
+final_data.json
 
 # C extensions
 *.so

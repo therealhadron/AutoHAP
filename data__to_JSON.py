@@ -7,6 +7,8 @@ final_data = {}
 final_data["Spaces"] = []
 save_path_final = "./final.json"
 
+# Pre processes the autocad lisp output into a JSON file to be processed again into a final JSON file that will be read by autoit
+# Saves the pre processed JSON file
 def create_json(file_path):
     data = {}
     try:
@@ -96,6 +98,8 @@ def process_json_data():
                 text_ceiling_height = text["Text"]["height"]
                 num_of_rooms = num_of_rooms + 1
                 spaces_floor_area = main.calculate_enclosed_area(room_vertex)
+                exterior_walls = []
+                exterior_walls_area = []
 
                 for i, room_coordinate in enumerate(room_vertex):
                     if i < len(room_vertex) - 1:
@@ -109,15 +113,18 @@ def process_json_data():
                                 is_building_outline_in_room_wall = main.is_point_on_line(building_coordinate, building_outline[j + 1], room_coordinate_1) and \
                                                                     main.is_point_on_line(building_coordinate, building_outline[j + 1], room_coordinate_2)
                                 if is_room_wall_in_building_outline or is_building_outline_in_room_wall:
-                                    print(text_name, room_wall_length)
-                                    print(main.wall_direction(room_vertex))
+                                    exterior_walls.append(main.wall_direction(room_vertex, room_coordinate_1, room_coordinate_2))
+                                    exterior_walls_area.append(room_wall_length*108/144)
                 
                 room_data["General"] = insert_spaces_general(text_name, spaces_floor_area, text_ceiling_height)
                 room_data["Internals"] = insert_spaces_internals()
-                room_data["Walls_Windows_Doors"] = insert_walls_windows_doors()
+                room_data["Walls_Windows_Doors"] = insert_walls_windows_doors(exterior_walls, exterior_walls_area)
                 room_data["Partitions"] = insert_spaces_partitions()
+
                 final_data["Spaces"].append(room_data)
                 room_data = {}
+                print(exterior_walls_area)
+                print(exterior_walls)
 
 def insert_spaces_general(general_name, general_floor_area, general_avg_ceiling_height, 
                           general_building_weight=70, general_oa_requirement_1 = 0, 
@@ -135,7 +142,7 @@ def insert_spaces_general(general_name, general_floor_area, general_avg_ceiling_
     return general_dict
 
 def insert_spaces_internals(internal_electric_equipment_wattage = 0,
-                            internal_electric_equipment_unit = "W/ft^2",
+                            internal_electric_equipment_unit = "W/ft²",
                             internal_electric_equipment_schedule = "Sample Schedule",
                             internal_people_occupancy = 0,
                             internal_people_occupancy_unit = "People",
@@ -163,16 +170,26 @@ def insert_walls_windows_doors(wall_exposure = None,
                                ):
     walls_windows_doors_dict = []
 
-    if wall_exposure is None:
-        for x in range(8):
-            walls_windows_doors_dict.append({"Exposure":"not used",
-                                             "Wall_Area": 0,
-                                             "Window":0,
-                                             "Door": 0,
-                                             "Wall_Assembly": "(none)",
-                                             "Window_Assembly": "(none)",
-                                             "Door_Assembly": "(none)"
-                                             })
+    if wall_exposure is not None:
+        for i in range(len(wall_exposure)):
+            walls_windows_doors_dict.append({"Exposure":wall_exposure[i],
+                                            "Wall_Area": wall_area[i],
+                                            "Window":0,
+                                            "Door": 0,
+                                            "Wall_Assembly": "Default Wall Assembly",
+                                            "Window_Assembly": "(none)",
+                                            "Door_Assembly": "(none)"
+                                            })
+    for x in range(8 - len(wall_exposure)):
+        walls_windows_doors_dict.append({"Exposure":"not used",
+                                            "Wall_Area": 0,
+                                            "Window":0,
+                                            "Door": 0,
+                                            "Wall_Assembly": "(none)",
+                                            "Window_Assembly": "(none)",
+                                            "Door_Assembly": "(none)"
+                                            })
+        
 
     return walls_windows_doors_dict
 
@@ -191,7 +208,7 @@ def insert_infiltration(design_cooling_CFM = 0,
     infiltration_dict = {}
     return infiltration_dict
 
-def insert_floors():
+def insert_floors(floor_type = None):
     floors_dict = {}
     return floors_dict
 
@@ -230,7 +247,7 @@ def insert_spaces_partitions(partition_1_ceiling_wall="Ceiling",
     
     return partitions_dict
 
-create_json("./Drawing2.txt")
+create_json("./autocad_output.txt")
 process_json_data()
 
 with open("./final_data.json", 'w') as json_file:

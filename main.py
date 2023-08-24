@@ -3,13 +3,13 @@ import math
 
 # Test data
 polygon_vertices = [
-(674.9337,604.6107),
-(934.9337,604.6107),
-(934.9337,189.1107),
-(242.4337,189.1107),
-(242.4337,449.1107),
-(674.9337,449.1107),
-(674.9337,604.6107)
+(139.4163,292.6237),
+(399.4163,292.6237),
+(399.4163,-122.8763),
+(-293.0837,-122.8763),
+(-293.0837,137.1237),
+(139.4163,137.1237),
+(139.4163,292.6237)
 ]
 
 # Given a list of coordinates (list of tuples) that form a polygon
@@ -108,12 +108,14 @@ def calculate_direction(coord1, coord2):
     return direction
 
 # Returns all directions of polygon sides pointing outwards
-def wall_direction(vertices, room_coordinate_1 = None, room_coordinate_2 = None):
+# if given specific coordinates in vertices, returns just the one direction of the specified
+# Return none otherwise
+def wall_direction(vertices, room_coordinates_1 = None, room_coordinates_2 = None):
     distance = 1
     list_of_directions = []
     for i in range(len(vertices)):
         if i < len(vertices) - 1:
-            if room_coordinate_1 == None and room_coordinate_2 == None:
+            if (room_coordinates_1 == vertices[i] and room_coordinates_2 == vertices[i+1]) or (room_coordinates_1 == None and room_coordinates_2 == None):
                 perpendicular_test_coordinate = calculate_perpendicular_point(vertices[i], vertices[i+1], distance)
                 midpoint = calculate_midpoint(vertices[i], vertices[i+1])
 
@@ -135,7 +137,12 @@ def wall_direction(vertices, room_coordinate_1 = None, room_coordinate_2 = None)
                     list_of_directions.append(calculate_direction(midpoint, perpendicular_test_coordinate))
                 elif not is_coordinate_in_polygon(vertices, perpendicular_test_coordinate) and intersection_count%2 != 0:
                     list_of_directions.append(calculate_direction(perpendicular_test_coordinate, midpoint))
-    return list_of_directions
+    if len(list_of_directions) == 0:
+        return None
+    elif len(list_of_directions) == 1:
+        return list_of_directions[0]
+    else:
+        return list_of_directions
 
 # Given a set of coordinates (list of tuples) return the area
 def calculate_enclosed_area(vertices):
@@ -167,5 +174,6 @@ def is_point_on_line(line_point1, line_point2, point):
     # Check if the point lies on the line (y == mx + b)
     return round(y, 4) == round(slope * x + y_intercept, 4)
 
+# print(wall_direction(polygon_vertices, (139.4163,137.1237), (139.4163,292.6237)))
 # print(wall_direction(polygon_vertices))
 # print(calculate_side_lengths(polygon_vertices))
