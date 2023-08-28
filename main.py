@@ -163,17 +163,49 @@ def is_point_on_line(line_point1, line_point2, point):
     x2, y2 = line_point2
     x, y = point
 
-    # Check for vertical line (x1 == x2)
-    if x1 == x2:
-        return round(x, 4) == round(x1, 4) and min(y1, y2) <= y <= max(y1, y2)
+    # Calculate the range of x values covered by the line segment
+    min_x = min(x1, x2)
+    max_x = max(x1, x2)
 
-    # Calculate slope and y-intercept of the line
-    slope = (y2 - y1) / (x2 - x1)
-    y_intercept = y1 - slope * x1
+    # Check if the point lies within the range of x values covered by the line segment
+    if min_x <= x <= max_x:
+        if x1 == x2:
+            # For vertical lines, check if the point's y-coordinate lies between the line's y-coordinates
+            return min(y1, y2) <= y <= max(y1, y2)
+        else:
+            # Calculate slope and y-intercept of the line
+            slope = (y2 - y1) / (x2 - x1)
+            y_intercept = y1 - slope * x1
 
-    # Check if the point lies on the line (y == mx + b)
-    return round(y, 4) == round(slope * x + y_intercept, 4)
+            # Calculate the expected y value on the line at the given x
+            expected_y = slope * x + y_intercept
 
-# print(wall_direction(polygon_vertices, (139.4163,137.1237), (139.4163,292.6237)))
-# print(wall_direction(polygon_vertices))
-# print(calculate_side_lengths(polygon_vertices))
+            # Check if the point's y-coordinate is within a small tolerance of the expected y value
+            tolerance = 1e-4  # You can adjust this tolerance as needed
+            return abs(y - expected_y) <= tolerance
+    else:
+        return False
+    
+def is_point_on_polygon(polygon_coordinates, point):
+    for i, coordinate in enumerate(polygon_coordinates):
+        if i < len(polygon_coordinates) - 1:
+            if is_point_on_line(polygon_coordinates[i], polygon_coordinates[i+1], point):
+                return True
+            else:
+                continue
+    return False
+
+def get_polygon_center(coordinates):
+    num_points = len(coordinates)
+    
+    x_sum = 0
+    y_sum = 0
+    
+    for x, y in coordinates:
+        x_sum += x
+        y_sum += y
+    
+    centroid_x = x_sum / num_points
+    centroid_y = y_sum / num_points
+    
+    return (centroid_x, centroid_y)

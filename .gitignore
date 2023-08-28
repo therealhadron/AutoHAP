@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+drawing_template.bak
+drawing_template.dwl
+drawing_template.dwl2
 autocad_output.txt
 data.json
 final_data.json

@@ -8,13 +8,11 @@ Opt("MouseCoordMode", 0)
 ;~ todo: json decoding
 $file = @ScriptDir & "\final_data.json"
 $jsonObject = json_decode_from_file($file)
-$spaceObject = Json_ObjGet($jsonObject, ".Spaces")
+$spaceObject = Json_Get($jsonObject, ".Spaces")
 
 Global Const $THUNDER_COMBO_BOX = "ThunderRT6ComboBox"
 Global Const $THUNDER_TEXT_BOX = "ThunderRT6TextBox"
 Global Const $MAIN_FORM = '[Class:ThunderRT6FormDC]'
-
-;~ main($Command)
 
 main()
 
@@ -30,25 +28,32 @@ Func main()
     openRoofs()
     openSchedule()
 
-    openSpaces()
-    WinActivate($MAIN_FORM)
+	$num_of_spaces = UBound($spaceObject) - 1
 
-	$spaceObject = Json_Get($jsonObject, ".Spaces[0]")
+	For $i = 0 To $num_of_spaces Step 1
 
-    _insert_space_general(Json_Get($spaceObject, '.General.Name'), _
-						Json_Get($spaceObject, '.General.Floor_Area'), _
-						Json_Get($spaceObject, '.General.Avg_Ceiling_Height'))
-    _insert_space_internals(Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage_Units'), _
-							Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage'), _
-							Json_Get($spaceObject, '.Internals.Electrical_Equipment.Schedule'), _
-							Json_Get($spaceObject, '.Internals.People.Activity_Level'), _
-							Json_Get($spaceObject, '.Internals.People.Occupancy'), _
-							Json_Get($spaceObject, '.Internals.People.Schedule'))
-    _insert_space_walls_windows_doors(0)
-    ;~ _insert_space_roofs_skylights(0)
-    ;~ _insert_space_infiltration(0)
-    ;~ _insert_space_floors(0)
-    ;~ _insert_space_partitions(0)
+		openSpaces()
+		WinActivate($MAIN_FORM)
+
+		$spaceObject = Json_Get($jsonObject, ".Spaces[" & $i & "]")
+
+		_insert_space_general(Json_Get($spaceObject, '.General.Name'), _
+							Json_Get($spaceObject, '.General.Floor_Area'), _
+							Json_Get($spaceObject, '.General.Avg_Ceiling_Height'))
+		_insert_space_internals(Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage_Units'), _
+								Json_Get($spaceObject, '.Internals.Electrical_Equipment.Wattage'), _
+								Json_Get($spaceObject, '.Internals.Electrical_Equipment.Schedule'), _
+								Json_Get($spaceObject, '.Internals.People.Activity_Level'), _
+								Json_Get($spaceObject, '.Internals.People.Occupancy'), _
+								Json_Get($spaceObject, '.Internals.People.Schedule'))
+		_insert_space_walls_windows_doors($i)
+		;~ _insert_space_roofs_skylights(0)
+		;~ _insert_space_infiltration(0)
+		;~ _insert_space_floors(0)
+		;~ _insert_space_partitions(0)
+		ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton15", "primary", 1)
+		Sleep(500)
+	Next
 EndFunc
 
 ;~ ===================
@@ -397,6 +402,8 @@ Func openWindows()
     $listhandler = ControlGetHandle($MAIN_FORM, "", "ListViewWndClass1")
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Window Properties")
+	ControlSetText($MAIN_FORM, "", "ThunderRT6TextBox1", "1")
+	ControlSetText($MAIN_FORM, "", "ThunderRT6TextBox4", "1")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
     WinWaitActive("HAP42")
 EndFunc
