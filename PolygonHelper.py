@@ -1,17 +1,6 @@
 from shapely.geometry import Polygon, Point, LineString
 import math
 
-# Test data
-polygon_vertices = [
-(139.4163,292.6237),
-(399.4163,292.6237),
-(399.4163,-122.8763),
-(-293.0837,-122.8763),
-(-293.0837,137.1237),
-(139.4163,137.1237),
-(139.4163,292.6237)
-]
-
 # Given a list of coordinates (list of tuples) that form a polygon
 # and a coordinate return true if coordinate lies within the polygon
 def is_coordinate_in_polygon(polygon_coordinates, coordinate):
@@ -181,7 +170,7 @@ def is_point_on_line(line_point1, line_point2, point):
             expected_y = slope * x + y_intercept
 
             # Check if the point's y-coordinate is within a small tolerance of the expected y value
-            tolerance = 1e-4  # You can adjust this tolerance as needed
+            tolerance = 1e-4  # Adjust tolerance as needed
             return abs(y - expected_y) <= tolerance
     else:
         return False

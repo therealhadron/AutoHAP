@@ -1,26 +1,31 @@
-;~ Import ctrl list view click item function
+#RequireAdmin
 #include <GuiListView.au3>
 #include <GuiTreeView.au3>
 #include <GUIButton.au3>
 #include <.\autoit_Json\Json.au3>
 
 Opt("MouseCoordMode", 0)
-;~ todo: json decoding
 $file = @ScriptDir & "\final_data.json"
 $jsonObject = json_decode_from_file($file)
 $spaceObject = Json_Get($jsonObject, ".Spaces")
 
 Global Const $THUNDER_COMBO_BOX = "ThunderRT6ComboBox"
 Global Const $THUNDER_TEXT_BOX = "ThunderRT6TextBox"
-Global Const $MAIN_FORM = '[Class:ThunderRT6FormDC]'
+Global Const $MAIN_FORM = "[Class:ThunderRT6FormDC]"
+Global Const $MAIN_FORM_TITLE = "HAP42 System Design Load - [Untitled]"
+
+If (WinExists($MAIN_FORM)) Then
+	MsgBox(0, "Error", "Existing HAP already opened. Please close first before trying again")
+	BlockInput(0)
+	Exit
+EndIf
 
 main()
 
 ;~ Main execution of functions
 Func main()
+	BlockInput(1)
     startHAP()
-
-	Sleep(2000)
 
     openWalls()
     openWindows()
@@ -31,7 +36,6 @@ Func main()
 	$num_of_spaces = UBound($spaceObject) - 1
 
 	For $i = 0 To $num_of_spaces Step 1
-
 		openSpaces()
 		WinActivate($MAIN_FORM)
 
@@ -52,7 +56,23 @@ Func main()
 		;~ _insert_space_floors(0)
 		;~ _insert_space_partitions(0)
 		ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton15", "primary", 1)
-		Sleep(500)
+		check_for_error()
+		WinWaitActive($MAIN_FORM)
+	Next
+	BlockInput(0)
+	Sleep(500)
+	MsgBox(0, "Complete", "Task completed successfully!")
+EndFunc
+
+Func check_for_error()
+	Local $error_keywords[2] = ["error", "Error(s)"]
+	Sleep(500)
+	For $i = 0 To UBound($error_keywords) - 1
+		if WinExists("", "error") Then
+			BlockInput(0)
+			MsgBox (48, "Error", "Fail")
+			Exit
+		EndIf
 	Next
 EndFunc
 
@@ -356,21 +376,15 @@ Func _insert_space_partitions($index)
     Next
 EndFunc
 
-;~ Inserts all the space data
-Func insertSpaceInfo()
-    WinWaitActive("Space Properties")
-
-    ;~ Save space
-    ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton15", "primary", 1)
-    WinWaitActive("HAP42")
-EndFunc
-
 ;~ Start the HAP42 software and sets focus on the window
 Func startHAP()
     run("C:\E20-II\HAP42\CODE\hap42.exe")
     WinWaitActive($MAIN_FORM)
-    ;~ to do: detect open project screen and handle it
-    ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2")
+	ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2")
+	WinWaitActive($MAIN_FORM)
+	If (WinActive("Open Project")) Then
+		ControlClick($MAIN_FORM, "Cancel", "ThunderRT6CommandButton4")
+	EndIf
     WinActivate($MAIN_FORM)
 EndFunc
 
@@ -393,7 +407,8 @@ Func openWalls()
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Wall Properties")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
-    WinWaitActive("HAP42")
+	check_for_error()
+    WinWaitActive($MAIN_FORM_TITLE)
 EndFunc
 
 ;~ Atm just creates a default window
@@ -405,7 +420,8 @@ Func openWindows()
 	ControlSetText($MAIN_FORM, "", "ThunderRT6TextBox1", "1")
 	ControlSetText($MAIN_FORM, "", "ThunderRT6TextBox4", "1")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
-    WinWaitActive("HAP42")
+	check_for_error()
+    WinWaitActive($MAIN_FORM_TITLE)
 EndFunc
 
 ;~ Atm just creates a default door
@@ -415,7 +431,8 @@ Func openDoors()
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Door Properties")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
-    WinWaitActive("HAP42")
+	check_for_error()
+    WinWaitActive($MAIN_FORM_TITLE)
 EndFunc
 
 ;~ Atm just creates a default roof
@@ -425,7 +442,8 @@ Func openRoofs()
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Roof Properties")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
-    WinWaitActive("HAP42")
+	check_for_error()
+    WinWaitActive($MAIN_FORM_TITLE)
 EndFunc
 
 ;~ Atm just creates a default schedule
@@ -435,7 +453,8 @@ Func openSchedule()
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Schedule Properties")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton3", "primary", 1)
-    WinWaitActive("HAP42")
+	check_for_error()
+    WinWaitActive($MAIN_FORM_TITLE)
 EndFunc
 
 Func _WWD_get_json_data($index)

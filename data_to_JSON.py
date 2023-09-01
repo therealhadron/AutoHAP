@@ -1,11 +1,12 @@
 import re
 import json
-import main
+import PolygonHelper
+import os
 
-save_path = "./data.json"
+save_path = "./AutoHAP_data.json"
 final_data = {}
 final_data["Spaces"] = []
-save_path_final = "./final.json"
+save_path_autoit_json = "./AutoIt_data.json"
 
 # Pre processes the autocad lisp output into a JSON file to be processed again into a final JSON file that will be read by autoit
 # Saves the pre processed JSON file
@@ -54,10 +55,8 @@ def create_json(file_path):
                                 text_contents[text_key] = text_value
                             if layer_name == "Configuration_text": data["Configuration"]["Text"] = text_contents
                             elif layer_name == "Text": text_list.append({"Text":text_contents, "Coordinates":eval(content[index+3])})
-
                         add_object = False
                 index = index + 1
-
             data["Texts"] = text_list
             data["System_Window_Lines"] = system_window_line_list
     except FileNotFoundError:
@@ -93,7 +92,7 @@ def process_json_data():
         for room in rooms: # Loops thru every room
             room_vertex = room["Coordinates"]
             # Check if room is within current building outline
-            if not main.is_coordinate_in_polygon(building_outline,main.get_polygon_center(room_vertex)):
+            if not PolygonHelper.is_coordinate_in_polygon(building_outline,PolygonHelper.get_polygon_center(room_vertex)):
                 continue
 
             text_name, text_ceiling_height, spaces_floor_area = get_room_text(texts, room_vertex)
@@ -111,18 +110,18 @@ def process_json_data():
                     room_coordinate_2 = room_vertex[i + 1]
                     
                     window_total_area = get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lines, system_windows, windows)
-                    room_wall_length = main.calculate_side_length(room_coordinate_1,room_coordinate_2)
+                    room_wall_length = PolygonHelper.calculate_side_length(room_coordinate_1,room_coordinate_2)
 
                     for j, building_coordinate in enumerate(building_outline): # Loops thru every vertex coordinate in building outline
                         if j < len(building_outline) - 1:
                             # room wall is shorter than building outline
-                            is_room_wall_in_building_outline = main.is_point_on_line(room_coordinate_1, room_coordinate_2, building_outline[j]) and \
-                                                                main.is_point_on_line(room_coordinate_1, room_coordinate_2, building_outline[j + 1])
+                            is_room_wall_in_building_outline = PolygonHelper.is_point_on_line(room_coordinate_1, room_coordinate_2, building_outline[j]) and \
+                                                                PolygonHelper.is_point_on_line(room_coordinate_1, room_coordinate_2, building_outline[j + 1])
                             # room wall is longer than building outline
-                            is_building_outline_in_room_wall = main.is_point_on_line(building_outline[j], building_outline[j + 1], room_coordinate_1) and \
-                                                                main.is_point_on_line(building_outline[j], building_outline[j + 1], room_coordinate_2)
+                            is_building_outline_in_room_wall = PolygonHelper.is_point_on_line(building_outline[j], building_outline[j + 1], room_coordinate_1) and \
+                                                                PolygonHelper.is_point_on_line(building_outline[j], building_outline[j + 1], room_coordinate_2)
                             if is_room_wall_in_building_outline or is_building_outline_in_room_wall:
-                                exterior_walls.append(main.wall_direction(room_vertex, room_coordinate_1, room_coordinate_2)) # Exterior wall direction
+                                exterior_walls.append(PolygonHelper.wall_direction(room_vertex, room_coordinate_1, room_coordinate_2)) # Exterior wall direction
                                 exterior_wall_window_area.append(window_total_area)
                                 exterior_walls_area.append(room_wall_length*float(text_ceiling_height)*12/144) # Exterior wall area
 
@@ -140,10 +139,10 @@ def process_json_data():
 # Gets room text data
 def get_room_text(texts, room_vertex):
     for text in texts:
-        if main.is_coordinate_in_polygon(room_vertex, text["Coordinates"]):
+        if PolygonHelper.is_coordinate_in_polygon(room_vertex, text["Coordinates"]):
             text_name = text["Text"]["name"] # Name of room
             text_ceiling_height = text["Text"]["height"] # Height of room
-            spaces_floor_area = main.calculate_enclosed_area(room_vertex) # Area of room
+            spaces_floor_area = PolygonHelper.calculate_enclosed_area(room_vertex) # Area of room
             return text_name, text_ceiling_height, spaces_floor_area
     return None
 
@@ -152,16 +151,16 @@ def get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lin
     for system_window_line in system_window_lines: # Loops all system lines to find which room it assoicates with
         system_window_line_coordinate_1 = system_window_line["Coordinates"][0]
         system_window_line_coordinate_2 = system_window_line["Coordinates"][1]
-        system_window_line_1 = main.is_point_on_line(room_coordinate_1, room_coordinate_2, system_window_line_coordinate_1)
-        system_window_line_2 = main.is_point_on_line(room_coordinate_1, room_coordinate_2, system_window_line_coordinate_2)
+        system_window_line_1 = PolygonHelper.is_point_on_line(room_coordinate_1, room_coordinate_2, system_window_line_coordinate_1)
+        system_window_line_2 = PolygonHelper.is_point_on_line(room_coordinate_1, room_coordinate_2, system_window_line_coordinate_2)
         if system_window_line_1 or system_window_line_2:
             for system_window in system_windows: # Loops all system windows to determine which one assoicates with the current system line
                 system_window_coordinates = system_window["Coordinates"]
-                if main.is_point_on_polygon(system_window_coordinates, system_window_line_coordinate_1) or \
-                main.is_point_on_polygon(system_window_coordinates, system_window_line_coordinate_2):
+                if PolygonHelper.is_point_on_polygon(system_window_coordinates, system_window_line_coordinate_1) or \
+                PolygonHelper.is_point_on_polygon(system_window_coordinates, system_window_line_coordinate_2):
                     for window in windows: # Loops all windows to determine which windows are within the current system window
-                        if main.is_coordinate_in_polygon(system_window_coordinates, window["Coordinates"][0]):
-                            window_total_area = window_total_area + round(main.calculate_enclosed_area(window["Coordinates"])/144,0)
+                        if PolygonHelper.is_coordinate_in_polygon(system_window_coordinates, window["Coordinates"][0]):
+                            window_total_area = window_total_area + round(PolygonHelper.calculate_enclosed_area(window["Coordinates"])/144,0)
                     return window_total_area
     return 0
 
@@ -314,5 +313,8 @@ def insert_spaces_partitions(partition_1_ceiling_wall="Ceiling",
 create_json("./autocad_output.txt")
 process_json_data()
 
-with open("./final_data.json", 'w', encoding="utf-8") as json_file:
+with open(save_path_autoit_json, 'w', encoding="utf-8") as json_file:
     json.dump(final_data, json_file, indent=2, ensure_ascii=False)
+
+# os.system("C:/\"Program Files (x86)\"/AutoIt3/AutoIt3.exe C:/Users/RyanH/Desktop/code/AutoHAP/AutoHAP.au3")
+os.system("C:/\"Program Files (x86)\"/AutoIt3/AutoIt3.exe ./AutoHAP.au3")

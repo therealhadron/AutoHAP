@@ -1,10 +1,17 @@
-(defun c:autohap ()
+(defun c:autohap () 
   (setq user_selection (ssget))
   (setq count (sslength user_selection))
   (setq i 0)
-  (setq output_file (getfiled "Select output file " "" "txt" 1))
+  (setq output_file (getfiled "Select output file " "autocad_output" "txt" 1))
   (setq file (open output_file "w"))
   (setq warning 0)
+  
+  ; Check if units are in decimal form. If not change to decimal form
+  (setq current_lunits (getvar "lunits"))
+  (if (/= current_lunits 2)
+    (setvar "lunits" 2)
+  )
+  
   (if user_selection
     (repeat count
       (setq entity (ssname user_selection i))
@@ -61,8 +68,15 @@
     (princ "")
   )
   (close file)
+  (setvar "lunits" current_lunits)
   (if (= warning 1)
     (princ "Warning selection includes non-closed polylines. Double check all polylines to ensure they are closed")
-    (princ "Successfully Saved")
+    (progn
+      (princ "Successfully Saved")
+      ; Begin execution of python and autoit scripts
+      (setq dwgPath (getvar "DWGPREFIX"))
+      (setq startFilePath (strcat dwgPath "/start.bat"))
+      (startapp startFilePath)
+    )
   )
 )
