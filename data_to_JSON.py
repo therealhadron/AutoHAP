@@ -2,6 +2,7 @@ import re
 import json
 import PolygonHelper
 import os
+import math
 
 save_path = "./AutoHAP_data.json"
 final_data = {}
@@ -23,6 +24,7 @@ def create_json(file_path):
             data["Room_Outline"] = []
             data["Building_Outline"] = []
             data["Window"] = []
+            data["Door"] = []
             data["System_Window"] = []
 
             while index < len(content):
@@ -35,7 +37,7 @@ def create_json(file_path):
                     if object == "Layer_name":
                         layer_name = re.search(r'>\s*(.*)', content[index]).group(1)
 
-                        if layer_name in ["Room_Outline", "Window", "System_Window", "Building_Outline"]:
+                        if layer_name in ["Room_Outline", "Window", "Door", "System_Window", "Building_Outline"]:
                             coord_list, index = get_object_coordinates(content, index)
                             data[layer_name].append({"Coordinates":coord_list})
                         elif layer_name == "Configuration":
@@ -85,6 +87,7 @@ def process_json_data():
     system_windows = json_data["System_Window"]
     system_window_lines = json_data["System_Window_Lines"]
     windows = json_data["Window"]
+    doors = json_data["Door"]
     building_outlines = json_data["Building_Outline"]
 
     for building_outline in building_outlines: # Loops thru every building outline (multiple floors)
@@ -101,6 +104,7 @@ def process_json_data():
             exterior_walls = []
             exterior_walls_area = []
             exterior_wall_window_area = []
+            exterior_wall_door_area = []
             roofs = []
             roofs_area = []
 
@@ -109,8 +113,8 @@ def process_json_data():
                     room_coordinate_1 = room_vertex[i]
                     room_coordinate_2 = room_vertex[i + 1]
                     
-                    window_total_area = get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lines, system_windows, windows)
-                    room_wall_length = PolygonHelper.calculate_side_length(room_coordinate_1,room_coordinate_2)
+                    window_total_area, door_total_area = get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lines, system_windows, windows, doors)
+                    room_wall_length = PolygonHelper.calculate_side_length(room_coordinate_1, room_coordinate_2)
 
                     for j, building_coordinate in enumerate(building_outline): # Loops thru every vertex coordinate in building outline
                         if j < len(building_outline) - 1:
@@ -123,11 +127,12 @@ def process_json_data():
                             if is_room_wall_in_building_outline or is_building_outline_in_room_wall:
                                 exterior_walls.append(PolygonHelper.wall_direction(room_vertex, room_coordinate_1, room_coordinate_2)) # Exterior wall direction
                                 exterior_wall_window_area.append(window_total_area)
+                                exterior_wall_door_area.append(door_total_area)
                                 exterior_walls_area.append(room_wall_length*float(text_ceiling_height)*12/144) # Exterior wall area
 
             room_data["General"] = insert_spaces_general(text_name, spaces_floor_area, text_ceiling_height)
             room_data["Internals"] = insert_spaces_internals()
-            room_data["Walls_Windows_Doors"] = insert_walls_windows_doors(exterior_walls, exterior_walls_area, exterior_wall_window_area)
+            room_data["Walls_Windows_Doors"] = insert_walls_windows_doors(exterior_walls, exterior_walls_area, exterior_wall_window_area, exterior_wall_door_area)
             room_data["Roofs_Skylights"] = insert_roofs_skylights(roofs, roofs_area)
             room_data["Infiltration"] = insert_infiltration()
             room_data["Floors"] = insert_floors()
@@ -146,8 +151,9 @@ def get_room_text(texts, room_vertex):
             return text_name, text_ceiling_height, spaces_floor_area
     return None
 
-def get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lines, system_windows, windows):
+def get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lines, system_windows, windows, doors):
     window_total_area = 0
+    door_total_area = 0
     for system_window_line in system_window_lines: # Loops all system lines to find which room it assoicates with
         system_window_line_coordinate_1 = system_window_line["Coordinates"][0]
         system_window_line_coordinate_2 = system_window_line["Coordinates"][1]
@@ -160,9 +166,12 @@ def get_wall_window_area(room_coordinate_1, room_coordinate_2, system_window_lin
                 PolygonHelper.is_point_on_polygon(system_window_coordinates, system_window_line_coordinate_2):
                     for window in windows: # Loops all windows to determine which windows are within the current system window
                         if PolygonHelper.is_coordinate_in_polygon(system_window_coordinates, window["Coordinates"][0]):
-                            window_total_area = window_total_area + round(PolygonHelper.calculate_enclosed_area(window["Coordinates"])/144,0)
-                    return window_total_area
-    return 0
+                            window_total_area = window_total_area + math.ceil(PolygonHelper.calculate_enclosed_area(window["Coordinates"])/144)
+                    for door in doors:
+                        if PolygonHelper.is_coordinate_in_polygon(system_window_coordinates, door["Coordinates"][0]):
+                            door_total_area = door_total_area + math.ceil(PolygonHelper.calculate_enclosed_area(door["Coordinates"])/144)
+                    return window_total_area, door_total_area
+    return 0, 0
 
 def insert_spaces_general(general_name, general_floor_area, general_avg_ceiling_height, 
                           general_building_weight=70, general_oa_requirement_1 = 0, 
@@ -213,10 +222,10 @@ def insert_walls_windows_doors(wall_exposure = None,
             walls_windows_doors_dict.append({"Exposure":wall_exposure[i],
                                             "Wall_Area": wall_area[i],
                                             "Window": wall_window[i],
-                                            "Door": 0,
+                                            "Door": wall_door[i],
                                             "Wall_Assembly": "Default Wall Assembly",
                                             "Window_Assembly": "Sample Window Assembly",
-                                            "Door_Assembly": "(none)"
+                                            "Door_Assembly": "Sample Door Assembly"
                                             })
     for x in range(8 - len(wall_exposure)):
         walls_windows_doors_dict.append({"Exposure":"not used",
@@ -310,11 +319,10 @@ def insert_spaces_partitions(partition_1_ceiling_wall="Ceiling",
     
     return partitions_dict
 
-create_json("./autocad_output.txt")
+create_json("C:/Users/RyanH/Desktop/code/AutoHAP/autocad_output.txt")
 process_json_data()
 
 with open(save_path_autoit_json, 'w', encoding="utf-8") as json_file:
     json.dump(final_data, json_file, indent=2, ensure_ascii=False)
 
-# os.system("C:/\"Program Files (x86)\"/AutoIt3/AutoIt3.exe C:/Users/RyanH/Desktop/code/AutoHAP/AutoHAP.au3")
 os.system("C:/\"Program Files (x86)\"/AutoIt3/AutoIt3.exe ./AutoHAP.au3")

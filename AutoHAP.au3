@@ -60,7 +60,7 @@ Func main()
 		WinWaitActive($MAIN_FORM)
 	Next
 	BlockInput(0)
-	Sleep(500)
+	Sleep(100)
 	MsgBox(0, "Complete", "Task completed successfully!")
 EndFunc
 
@@ -430,6 +430,7 @@ Func openDoors()
     $listhandler = ControlGetHandle($MAIN_FORM, "", "ListViewWndClass1")
     _GUICtrlListView_ClickItem($listhandler, 0, "primary", False, 2)
     WinWaitActive("Door Properties")
+	ControlSetText($MAIN_FORM, "", "ThunderRT6TextBox5", "1")
     ControlClick($MAIN_FORM, "", "ThunderRT6CommandButton2", "primary", 1)
 	check_for_error()
     WinWaitActive($MAIN_FORM_TITLE)
