@@ -4,10 +4,10 @@ import PolygonHelper
 import os
 import math
 
-save_path = "./AutoHAP_data.json"
+save_path = "./AutoHAP_data.json" # This is for this python script
 final_data = {}
 final_data["Spaces"] = []
-save_path_autoit_json = "./AutoIt_data.json"
+save_path_autoit_json = "./AutoIt_data.json" # This is for autoit script
 
 # Pre processes the autocad lisp output into a JSON file to be processed again into a final JSON file that will be read by autoit
 # Saves the pre processed JSON file
@@ -319,7 +319,8 @@ def insert_spaces_partitions(partition_1_ceiling_wall="Ceiling",
     
     return partitions_dict
 
-create_json("C:/Users/RyanH/Desktop/code/AutoHAP/autocad_output.txt")
+current_path = os.getcwd()
+create_json(f"{current_path}/autocad_output.txt")
 process_json_data()
 
 with open(save_path_autoit_json, 'w', encoding="utf-8") as json_file:

@@ -5,7 +5,7 @@
 #include <.\autoit_Json\Json.au3>
 
 Opt("MouseCoordMode", 0)
-$file = @ScriptDir & "\final_data.json"
+$file = @ScriptDir & "\AutoIt_data.json"
 $jsonObject = json_decode_from_file($file)
 $spaceObject = Json_Get($jsonObject, ".Spaces")
 
